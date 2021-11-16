@@ -1,33 +1,18 @@
-# Задание № 3. Полиморфизм и магические методы
+# Задание № 4. Полевые испытания
 
-# Перегрузите магический метод __str__ у всех классов.
-# У проверяющих он должен выводить информацию в следующем виде:
+# Создайте по 2 экземпляра каждого класса, вызовите
+# все созданные методы, а также реализуйте две функции:
 
-# print(some_reviewer)
-# Имя: Some
-# Фамилия: Buddy
+# для подсчета средней оценки за домашние задания по всем
+# студентам в рамках конкретного курса 
+# (в качестве аргументов принимаем список студентов
+# и название курса);
 
-# У лекторов:
+# для подсчета средней оценки за лекции всех лекторов
+# в рамках курса (в качестве аргумента принимаем список
+# лекторов и название курса).
 
-# print(some_lecturer)
-# Имя: Some
-# Фамилия: Buddy
-# Средняя оценка за лекции: 9.9
-
-# А у студентов так:
-
-# print(some_student)
-# Имя: Ruoy
-# Фамилия: Eman
-# Средняя оценка за домашние задания: 9.9
-# Курсы в процессе изучения: Python, Git
-# Завершенные курсы: Введение в программирование
-
-# Реализуйте возможность сравнивать (через операторы сравнения)
-# собой лекторов по средней оценке за лекции и 
-# студентов по средней оценке за домашние задания.
-
-# Решение № 3:
+# Решение № 4:
 
 class Student:
 
@@ -39,6 +24,7 @@ class Student:
         self.courses_in_progress = []
         self.grades = {}
         self.average_score = 0
+        students_list.append(self.__dict__)  
 
     def rate_lecturer(self, lecturer, course, grade):
         if isinstance(lecturer, Lecturer) and course in self.courses_in_progress and course in lecturer.courses_attached:
@@ -72,12 +58,13 @@ class Lecturer(Mentor):
         self.courses_in_progress = []
         self.average_score = 0
         super().__init__(name, surname)
+        lecturers_list.append(self.__dict__)
 
     def __str__(self):
         return f'Имя: {self.name} \n' \
                f'Фамилия: {self.surname} \n' \
                f'Средняя оценка за лекции: {self.average_score}'
-    
+
     def __lt__(self, other):
         if not isinstance(other, Lecturer):
             return
@@ -86,8 +73,8 @@ class Lecturer(Mentor):
 class Reviewer(Mentor):
 
     def __init__(self, name, surname):
-        self.courses_attached = []        
-        super().__init__(name, surname)  
+        self.courses_attached = []
+        super().__init__(name, surname)     
             
     def rate_hw(self, student, course, grade):
         if isinstance(student, Student) and course in self.courses_attached and course in student.courses_in_progress:
@@ -109,20 +96,104 @@ class Reviewer(Mentor):
         return f'Имя: {self.name} \n' \
                f'Фамилия: {self.surname}'
 
-best_student = Student('Ruoy', 'Eman', 'your_gender')
-best_student.courses_in_progress += ['Python']
+students_list = []
+lecturers_list = []
 
-cool_reviewer = Reviewer('Some', 'Buddy')
-cool_reviewer.courses_attached += ['Python']
+def average_grade_hw(students, courses):
+    sum_gs = 0
+    counter = 0
+    for student in students:
+        for key, value in student['grades'].items():
+            if courses in key:
+                sum_gs += sum(value) / len(value)
+                counter += 1
+    return round(sum_gs / counter, 2)
 
-cool_reviewer.rate_hw(best_student, 'Python', 10)
-cool_reviewer.rate_hw(best_student, 'Python', 10)
-cool_reviewer.rate_hw(best_student, 'Python', 10)
+def average_grade_lecturer(lecturers, courses):
+    sum_gl = 0
+    counter = 0
+    for lecturer in lecturers:
+        if courses in lecturer["courses_attached"]:
+           sum_gl += sum(lecturer["grades"]) / len(lecturer["grades"])
+           counter += 1
+    return round(sum_gl / counter, 2)
 
-best_lecturer = Lecturer('Ruoy', 'Eman')
-best_lecturer.courses_in_progress += ['Python']
+petrova = Student('Елена', 'Петрова', 'ж')
+petrova.courses_in_progress += ['Python']
+petrova.finished_courses += ['Git']
 
-best_student.rate_lecturer(best_lecturer, 'Python', 10)
+ivanov = Student('Иван', 'Иванов', 'м')
+ivanov.courses_in_progress += ['Python']
+ivanov.courses_in_progress += ['Git']
 
-print(best_student.grades)
-print(best_lecturer.grades)
+sidorov = Lecturer('Сергей', 'Сидоров')
+sidorov.courses_attached += ['Python']
+
+chizikov = Lecturer('Николай', 'Чижиков')
+chizikov.courses_attached += ['Git']
+
+sorokin = Reviewer('Артем', 'Сорокин')
+sorokin.courses_attached += ['Python']
+
+popova = Reviewer('Ольга', 'Попова')
+popova.courses_attached += ['Git']
+
+sorokin.rate_hw(petrova, 'Python', 9)
+sorokin.rate_hw(petrova, 'Python', 10)
+sorokin.rate_hw(petrova, 'Python', 9)
+
+popova.rate_hw(petrova, 'Git', 4)
+popova.rate_hw(petrova, 'Git', 6)
+popova.rate_hw(petrova, 'Git', 5)
+
+sorokin.rate_hw(ivanov, 'Python', 7)
+sorokin.rate_hw(ivanov, 'Python', 8)
+sorokin.rate_hw(ivanov, 'Python', 8)
+
+popova.rate_hw(ivanov, 'Git', 8)
+popova.rate_hw(ivanov, 'Git', 6)
+popova.rate_hw(ivanov, 'Git', 4)
+
+petrova.rate_lecturer(sidorov, 'Python', 9)
+petrova.rate_lecturer(sidorov, 'Python', 10)
+petrova.rate_lecturer(sidorov, 'Python', 10)
+
+ivanov.rate_lecturer(sidorov, 'Python', 10)
+ivanov.rate_lecturer(sidorov, 'Python', 10)
+ivanov.rate_lecturer(sidorov, 'Python', 10)
+
+petrova.rate_lecturer(chizikov, 'Git', 10)
+petrova.rate_lecturer(chizikov, 'Git', 9)
+petrova.rate_lecturer(chizikov, 'Git', 9)
+
+ivanov.rate_lecturer(chizikov, 'Git', 7)
+ivanov.rate_lecturer(chizikov, 'Git', 6)
+ivanov.rate_lecturer(chizikov, 'Git', 7)
+
+print('Список студентов с показателями:')
+print(f'')
+print(petrova)
+print(f'')
+print(ivanov)
+print(f'')
+print('Список преподавателей с показателями:')
+print(f'')
+print(sidorov)
+print(f'')
+print(chizikov)
+print(f'')
+print('Список экспертов:')
+print(f'')
+print(sorokin)
+print(f'')
+print(popova)
+print(f'')
+print(f'Статистика:')
+print(f'')
+print('Средний балл за домашние задания по курсу "Python":', average_grade_hw(students_list, 'Python'))
+print(f'')
+print('Средний балл за домашние задания по курсу "Git":', average_grade_hw(students_list, 'Git'))
+print(f'')
+print('Средний балл за лекции по курсу "Python":', average_grade_lecturer(lecturers_list, 'Python'))
+print(f'')
+print('Средний балл за лекции по курсу "Git":', average_grade_lecturer(lecturers_list, 'Git'))
