@@ -1,13 +1,15 @@
-# Задание № 1. Наследование
+# Задание № 2. Атрибуты и взаимодействие классов
 
-# класс Mentor должен стать родительским 
-# классом, а от него нужно реализовать 
-# наследование классов Lecturer (лекторы) 
-# и Reviewer (эксперты, проверяющие домашние задания). 
-# Очевидно, имя,фамилия и список закрепленных курсов
-# логично реализовать на уровне родительского класса.
-
-# Решение № 1:
+# Bозможность выставлять студентам оценки за домашние задания могут делать только Reviewer (реализуйте такой метод)!
+# Лекторы: Получать оценки за лекции от студентов :) 
+# Реализуйте метод выставления оценок лекторам у класса Student
+# (оценки по 10-балльной шкале, хранятся в атрибуте-словаре 
+# у Lecturer, в котором ключи – названия курсов, 
+# а значения – списки оценок).
+# Лектор при этом должен быть закреплен за тем курсом,
+# на который записан студент.
+   
+# Решение № 2:
 
 class Student:
 
@@ -18,17 +20,34 @@ class Student:
         self.finished_courses = []
         self.courses_in_progress = []
         self.grades = {}
-     
+        self.average_score = 0  
+
+    def rate_lecturer(self, lecturer, course, grade):
+        if isinstance(lecturer, Lecturer) and course in self.courses_in_progress and course in lecturer.courses_attached:
+            lecturer.grades += [grade]
+            lecturer.average_score = round(sum(lecturer.grades) / len(lecturer.grades), 2)
+
 class Mentor:
 
     def __init__(self, name, surname):
-
         self.name = name
         self.surname = surname
         self.courses_attached = []
-        
-    def rate_hw(self, student, course, grade):
 
+class Lecturer(Mentor):
+
+    def __init__(self, name, surname):
+        self.courses_attached = []
+        self.grades = []
+        self.courses_in_progress = []
+        super().__init__(name, surname)
+
+class Reviewer(Mentor):
+
+    def __init__(self, name, surname):
+        self.courses_attached = []        
+            
+    def rate_hw(self, student, course, grade):
         if isinstance(student, Student) and course in self.courses_attached and course in student.courses_in_progress:
             if course in student.grades:
                 student.grades[course] += [grade]
@@ -37,27 +56,20 @@ class Mentor:
         else:
             return 'Ошибка'
 
-class Lecturer(Mentor):
+best_student = Student('Ruoy', 'Eman', 'your_gender')
+best_student.courses_in_progress += ['Python']
 
-    def __init__(self, name, surname):
-        self.courses_attached = []
-        self.courses_in_progress = []
-        self.grades = []
+cool_reviewer = Reviewer('Some', 'Buddy')
+cool_reviewer.courses_attached += ['Python']
 
-class Reviewer(Mentor):
+cool_reviewer.rate_hw(best_student, 'Python', 10)
+cool_reviewer.rate_hw(best_student, 'Python', 10)
+cool_reviewer.rate_hw(best_student, 'Python', 10)
 
-    def __init__(self, name, surname):
-        self.courses_attached = []
-        self.grades = []
+best_lecturer = Lecturer('Ruoy', 'Eman')
+best_lecturer.courses_in_progress += ['Python']
 
-# best_student = Student('Ruoy', 'Eman', 'your_gender')
-# best_student.courses_in_progress += ['Python']
+best_student.rate_lecturer(best_lecturer, 'Python', 10)
 
-# cool_mentor = Mentor('Some', 'Buddy')
-# cool_mentor.courses_attached += ['Python']
-
-# cool_mentor.rate_hw(best_student, 'Python', 10)
-# cool_mentor.rate_hw(best_student, 'Python', 10)
-# cool_mentor.rate_hw(best_student, 'Python', 10)
-
-# print(best_student.grades)
+print(best_student.grades)
+print(best_lecturer.grades)
